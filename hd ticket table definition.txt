@@ -1,0 +1,68 @@
+itsdave@deskdev:~/frappe-bench$ bench --site deskdev.itsdave.de mariadb
+Welcome to the MariaDB monitor.  Commands end with ; or \g.
+Your MariaDB connection id is 374770
+Server version: 10.6.13-MariaDB-1:10.6.13+maria~deb11 mariadb.org binary distribution
+
+Copyright (c) 2000, 2018, Oracle, MariaDB Corporation Ab and others.
+
+Type 'help;' or '\h' for help. Type '\c' to clear the current input statement.
+
+MariaDB [_03beda2834fc7948]> SHOW CREATE TABLE `tabHD Ticket` \G`;
+*************************** 1. row ***************************
+       Table: tabHD Ticket
+
+       
+Create Table: CREATE TABLE `tabHD Ticket` (
+  `name` bigint(20) NOT NULL,
+  `creation` datetime(6) DEFAULT NULL,
+  `modified` datetime(6) DEFAULT NULL,
+  `modified_by` varchar(140) DEFAULT NULL,
+  `owner` varchar(140) DEFAULT NULL,
+  `docstatus` int(1) NOT NULL DEFAULT 0,
+  `idx` int(8) NOT NULL DEFAULT 0,
+  `subject` varchar(140) DEFAULT NULL,
+  `raised_by` varchar(140) DEFAULT NULL,
+  `status` varchar(140) DEFAULT 'Open',
+  `priority` varchar(140) DEFAULT 'Medium',
+  `ticket_type` varchar(140) DEFAULT NULL,
+  `agent_group` varchar(140) DEFAULT NULL,
+  `ticket_split_from` varchar(140) DEFAULT NULL,
+  `description` longtext DEFAULT NULL,
+  `template` varchar(140) DEFAULT NULL,
+  `sla` varchar(140) DEFAULT NULL,
+  `response_by` datetime(6) DEFAULT NULL,
+  `response_by_variance` decimal(21,9) DEFAULT NULL,
+  `agreement_status` varchar(140) DEFAULT 'First Response Due',
+  `resolution_by` datetime(6) DEFAULT NULL,
+  `resolution_by_variance` decimal(21,9) DEFAULT NULL,
+  `service_level_agreement_creation` datetime(6) DEFAULT NULL,
+  `on_hold_since` datetime(6) DEFAULT NULL,
+  `total_hold_time` decimal(21,9) DEFAULT NULL,
+  `first_response_time` decimal(21,9) DEFAULT NULL,
+  `first_responded_on` datetime(6) DEFAULT NULL,
+  `avg_response_time` decimal(21,9) DEFAULT NULL,
+  `resolution_details` longtext DEFAULT NULL,
+  `opening_date` date DEFAULT NULL,
+  `opening_time` time(6) DEFAULT NULL,
+  `resolution_date` datetime(6) DEFAULT NULL,
+  `resolution_time` decimal(21,9) DEFAULT NULL,
+  `user_resolution_time` decimal(21,9) DEFAULT NULL,
+  `contact` varchar(140) DEFAULT NULL,
+  `customer` varchar(140) DEFAULT NULL,
+  `email_account` varchar(140) DEFAULT NULL,
+  `via_customer_portal` int(1) NOT NULL DEFAULT 0,
+  `attachment` text DEFAULT NULL,
+  `content_type` varchar(140) DEFAULT NULL,
+  `feedback_submitted` int(1) NOT NULL DEFAULT 0,
+  `satisfaction_rating` decimal(3,2) DEFAULT NULL,
+  `customer_feedback` longtext DEFAULT NULL,
+  `feedback_status` varchar(140) DEFAULT NULL,
+  `_user_tags` text DEFAULT NULL,
+  `_comments` text DEFAULT NULL,
+  `_assign` text DEFAULT NULL,
+  `_liked_by` text DEFAULT NULL,
+  `_seen` text DEFAULT NULL,
+  PRIMARY KEY (`name`),
+  KEY `status` (`status`),
+  KEY `modified` (`modified`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci ROW_FORMAT=DYNAMIC

@@ -6,7 +6,7 @@ export default function DrawerLayout() {
     const theme = useTheme();
 
     return (
-        <Drawer>
+        <Drawer screenOptions={{ headerShown: false }}>
             <Drawer.Screen
                 name="home"
                 options={{
@@ -24,7 +24,7 @@ export default function DrawerLayout() {
             >
             </Drawer.Screen>
             <Drawer.Screen
-                name="tickets"
+                name="(tabs)"
                 options={{
                     drawerLabel: "Tickets",
                     title: "Tickets",

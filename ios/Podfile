@@ -37,10 +37,7 @@ elsif podfile_properties.key?('ios.flipper') then
   end
 end
 
-# @generated begin @nozbe/watermelondb - expo prebuild (DO NOT MODIFY) sync-947dd55cfd5b53a4055a2285c3b58944af0934e1
-pod 'simdjson', path: '../node_modules/@nozbe/simdjson', modular_headers: true
-# @generated end @nozbe/watermelondb
-target 'watermelonapp' do
+target 'insideapp' do
   use_expo_modules!
   config = use_native_modules!
 

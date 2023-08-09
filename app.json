@@ -1,8 +1,9 @@
 {
   "expo": {
-    "name": "watermelon-app",
-    "slug": "watermelon-app",
+    "name": "inside_app",
+    "slug": "inside_app",
     "version": "1.0.0",
+    "scheme": "inside_app",
     "orientation": "portrait",
     "icon": "./assets/logo.png",
     "userInterfaceStyle": "light",
@@ -15,7 +16,7 @@
       "**/*"
     ],
     "ios": {
-      "bundleIdentifier": "com.anonymous.watermelon-app",
+      "bundleIdentifier": "1.insideapp",
       "supportsTablet": true
     },
     "android": {
@@ -26,6 +27,12 @@
     },
     "web": {
       "favicon": "./assets/favicon.png"
+    },
+    "plugins": [
+      "expo-router"
+    ],
+    "experiments": {
+      "tsconfigPaths": true
     }
   }
 }

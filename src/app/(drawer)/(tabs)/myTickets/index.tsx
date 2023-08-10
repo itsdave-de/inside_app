@@ -1,11 +1,11 @@
 import { Layout } from '@ui-kitten/components';
-import { Drawer } from 'expo-router/drawer';
-
+import { Stack } from 'expo-router';
 
 import { Ticket } from '@src/models/Ticket';
 import { useState } from 'react';
 import { useQuery } from '@realm/react';
 import { TicketManager } from '@src/components/TicketsManager';
+import { DrawerToggleButton } from '@react-navigation/drawer';
 
 export default function TicketsPage() {
     const [showDone, setShowDone] = useState(false);
@@ -24,10 +24,10 @@ export default function TicketsPage() {
 
     return (
         <Layout style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-            <Drawer.Screen
-                options={{
-                    title: "Tickets",
-                    headerShown: true
+            <Stack.Screen options={{
+                    headerShown: true,
+                    title: "My Tickets",
+                    headerLeft: () => <DrawerToggleButton />,
                 }}
             />
             <TicketManager tickets={tickets} setShowDone={setShowDone} showDone={showDone} />

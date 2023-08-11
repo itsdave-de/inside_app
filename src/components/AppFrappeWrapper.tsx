@@ -10,8 +10,8 @@ export default function AppFrappeWrapper(): React.ReactElement {
     const colorScheme = useColorScheme();
 
     const userSettings = useObject(Settings, process.env.EXPO_PUBLIC_SETTINGS_ID);
-    const getUserTokensFromSettings = () => {
-        return `Authorization: token ${userSettings.apiKey}:${userSettings.apiSecret}`;
+    const getUserAuthorizationTokensFromSettings = () => {
+        return `${userSettings.apiKey}:${userSettings.apiSecret}`;
     };
 
     return (
@@ -19,8 +19,8 @@ export default function AppFrappeWrapper(): React.ReactElement {
             url={userSettings.apiUrl}
             tokenParams={{
                 useToken: true,
-                token: () => { return getUserTokensFromSettings() },
-                type: "Bearer"
+                token: () => { return getUserAuthorizationTokensFromSettings() },
+                type: "token"
             }}
         >
             <ApplicationProvider {...eva} theme={eva[colorScheme]}>

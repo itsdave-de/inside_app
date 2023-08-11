@@ -39,6 +39,22 @@ export default function DrawerLayout() {
                 }}
             >
             </Drawer.Screen>
+            <Drawer.Screen
+                name="settings"
+                options={{
+                    drawerLabel: "Settings",
+                    title: "Settings",
+                    drawerIcon: () => {
+                        return (
+                            <Icon
+                                name='settings-2'
+                                style={[styles.icon, { tintColor: theme["color-primary-default"]} ]}
+                            />
+                        );
+                    }
+                }}
+            >
+            </Drawer.Screen>
         </Drawer>
     );
 }

@@ -40,6 +40,22 @@ export default function DrawerLayout() {
             >
             </Drawer.Screen>
             <Drawer.Screen
+                name="superSearch"
+                options={{
+                    drawerLabel: "Super Search",
+                    title: "Super Search",
+                    drawerIcon: () => {
+                        return (
+                            <Icon
+                                name='search'
+                                style={[styles.icon, { tintColor: theme["color-primary-default"]} ]}
+                            />
+                        );
+                    }
+                }}
+            >
+            </Drawer.Screen>
+            <Drawer.Screen
                 name="settings"
                 options={{
                     drawerLabel: "Settings",

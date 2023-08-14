@@ -1,18 +1,24 @@
 import { DrawerToggleButton } from '@react-navigation/drawer';
-import { Icon, Input, Layout, List, ListItem, Text } from '@ui-kitten/components';
+import { Button, Icon, Input, Layout, List, ListItem, Spinner, Text } from '@ui-kitten/components';
 import Drawer from 'expo-router/drawer';
 import { useFrappeGetCall } from 'frappe-react-sdk';
-import { useState } from 'react';
-import { StyleSheet, TouchableWithoutFeedback } from 'react-native';
+import { useRef, useState } from 'react';
+import { StyleSheet, View } from 'react-native';
 
 export default function SuperSearchPage(): React.ReactElement {
     const [searchValue, setSearchValue] = useState('');
-    const [response, setResponse] = useState([]);
+    const [loading, setLoading] = useState(false);
+    const searchValueRef = useRef(searchValue);
+
+    const setSearchValueRef = (data) => {
+        searchValueRef.current = data;
+        setSearchValue(data);
+    };
 
     const frappeGetCall = useFrappeGetCall(
         'ssc_camp_management.tools.personen_suche',
         {
-            "value": searchValue,
+            "value": searchValueRef.current,
             "exact_match": 0,
             "reservierung_beruecksichtigen": 1,
             "mitreisende_vorname_beruecksichtigen": 1,
@@ -24,26 +30,9 @@ export default function SuperSearchPage(): React.ReactElement {
     );
 
     const search = () => {
-        setResponse(frappeGetCall.data);
-        console.log(response);
-        
+        setLoading(true);
+        setSearchValueRef(searchValue);
     }
-
-//     const renderItem = ({ item, index }): React.ReactElement => {
-// console.log(item);
-// console.log(index);
-
-
-//         const keys = Object.keys(item);
-//         const values = Object.values(item);
-        
-//         return (<ListItem
-//         //   style={styles.item}
-//           title={keys[index]}
-//           description={values[index]}
-//         />
-//         )
-//     };
 
     return (
         <Layout style={styles.layoutContainer}>
@@ -59,27 +48,34 @@ export default function SuperSearchPage(): React.ReactElement {
                     style={styles.inputContainer}
                     size='medium'
                     value={searchValue}
-                    label='Search'
+                    label=''
                     placeholder='Place your Text'
                     accessoryRight={(props) => {
                         return (
-                            <TouchableWithoutFeedback onPress={() => { search() }}>
                                 <Icon
                                     {...props}
                                     name={'search'}
                                 />
-                            </TouchableWithoutFeedback>
                         )
                     }}
-                    onChangeText={nextValue => setSearchValue(nextValue)}
+                    onChangeText={(nextValue) => {
+                        setSearchValue(nextValue);
+                        setLoading(false);
+                    }}
                 />
-                {/* <Layout style={styles.formContainer}>
-                    <List
-                        data={response?.message?.reser_name}
-                        renderItem={() => { return renderItem(response) }}
-                    />
-                </Layout> */}
-                <Text>Response: {JSON.stringify(response)}</Text>
+                <Button
+                    style={styles.button}
+                    onPress={() => { search() }}
+                >
+                    Search
+                </Button>
+
+                <View style={styles.results}>
+                    {loading && !frappeGetCall.data
+                        ? <Spinner size='giant' />
+                        : <Text>{JSON.stringify(frappeGetCall.data)}</Text>
+                    }
+                </View>
             </Layout>
         </Layout>
     );
@@ -96,30 +92,15 @@ const styles = StyleSheet.create({
         alignItems: 'flex-start',
         width: '90%',
     },
-    listContainer: {
-        flex: 1,
-        width: '100%',
-    },
     inputContainer: {
         margin: 20
     },
     button: {
-        alignSelf: 'center'
+        alignSelf: 'center',
+        marginBottom: 20
     },
-    captionContainer: {
-        display: 'flex',
-        flexDirection: 'row',
-        alignItems: 'center',
-    },
-    captionIcon: {
-        width: 10,
-        height: 10,
-        marginRight: 5,
-    },
-    captionText: {
-        fontSize: 12,
-        fontWeight: '400',
-        fontFamily: 'opensans-regular',
-        color: '#8F9BB3',
-    },
+    results: {
+        flex: 1,
+        alignSelf: 'center',
+    }
 });

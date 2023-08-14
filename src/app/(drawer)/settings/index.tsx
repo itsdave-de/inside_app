@@ -44,6 +44,7 @@ export default function SettingsPage(): ReactElement {
         );
     };
 
+    // TODO: optimize layout (maybe just need to render the FlatList)
     return (
         <Layout style={styles.layoutContainer}>
             <Drawer.Screen

@@ -8,15 +8,18 @@ import { useColorScheme } from "react-native";
 
 export default function AppFrappeWrapper(): React.ReactElement {
     const colorScheme = useColorScheme();
+    const defaultUrl = '';
+    const defaultKey = '';
+    const defaultSecret = '';
 
     const userSettings = useObject(Settings, process.env.EXPO_PUBLIC_SETTINGS_ID);
     const getUserTokensFromSettings = () => {
-        return `Authorization: token ${userSettings.apiKey}:${userSettings.apiSecret}`;
+        return `Authorization: token ${userSettings ? userSettings.apiKey : defaultKey}:${userSettings ? userSettings.apiSecret : defaultSecret}`;
     };
 
     return (
         <FrappeProvider
-            url={userSettings.apiUrl}
+            url={userSettings ? userSettings.apiUrl : defaultUrl}
             tokenParams={{
                 useToken: true,
                 token: () => { return getUserTokensFromSettings() },

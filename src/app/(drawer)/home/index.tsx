@@ -40,8 +40,18 @@ export default function HomePage() {
     }
 
     return (
+
+          
         <Layout style={{ flex: 1 }}>
-            {/* ... */}
+               <Drawer.Screen
+                options={{
+                    title: "Home",
+                    headerShown: true,
+                    headerLeft: () => <DrawerToggleButton />,
+                }}
+            />
+
+
             <ScrollView 
                 contentContainerStyle={{ justifyContent: 'flex-start', alignItems: 'center' }}
                 refreshControl={

@@ -5,6 +5,7 @@ import { useFrappeGetCall } from 'frappe-react-sdk';
 import React, { useState, useEffect } from 'react';
 import { ScrollView, RefreshControl, Dimensions, StyleSheet, TouchableWithoutFeedback } from 'react-native';
 import HTML from 'react-native-render-html';
+import useSWR, { mutate } from 'swr';
 
 export default function HomePage() {
     const contentWidth = Dimensions.get('window').width;
@@ -12,23 +13,35 @@ export default function HomePage() {
     const [refreshKey, setRefreshKey] = useState(0);
     const [refreshing, setRefreshing] = useState(false);
 
-    const { data, isLoading, error } = useFrappeGetCall("ssc_camp_management.inside_app_api.get_notes_for_homescreen");
+    const { data, isLoading, error } = useFrappeGetCall(
+        "ssc_camp_management.inside_app_api.get_notes_for_homescreen",
+        undefined, // If no params are used
+        refreshKey.toString(),
+      );
 
-    useEffect(() => {
+      const [isLoadingRefresh, setIsLoadingRefresh] = useState(false); // Add this state
+
+      useEffect(() => {
         if (error) {
             console.error("Ein Fehler ist aufgetreten:", error);
+            setIsLoadingRefresh(false);  // Update state when there's an error
+            setRefreshing(false);       // Stop the refresh indicator
         }
         if (data && !isLoading) {
             setResponse(data);
             console.log(data);
+            setIsLoadingRefresh(false);  // Update state when data is loaded
+            setRefreshing(false);       // Stop the refresh indicator
         }
     }, [data, error, refreshKey]);
-
+    
     const handleRefresh = () => {
         setRefreshing(true);
+        setIsLoadingRefresh(true); // Set refresh to loading
         setRefreshKey(prevKey => prevKey + 1);
-        setRefreshing(false);
+        setRefreshing(false);    // This stops the refresh indicator, but because of isLoadingRefresh, you continue showing the old data until new data loads
     };
+    
 
     function renderNoteCard(note) {
         return (
@@ -51,24 +64,23 @@ export default function HomePage() {
                 }}
             />
 
+<ScrollView 
+    contentContainerStyle={{ justifyContent: 'flex-start', alignItems: 'center' }}
+    refreshControl={
+        <RefreshControl refreshing={refreshing} onRefresh={handleRefresh} />
+    }
+>
+    {error && <Text>Ein Fehler ist aufgetreten. Bitte versuchen Sie es später erneut.</Text>}
 
-            <ScrollView 
-                contentContainerStyle={{ justifyContent: 'flex-start', alignItems: 'center' }}
-                refreshControl={
-                    <RefreshControl refreshing={refreshing} onRefresh={handleRefresh} />
-                }
-            >
-                {error && <Text>Ein Fehler ist aufgetreten. Bitte versuchen Sie es später erneut.</Text>}
-                
-                {data ? 
-                    <Text style={styles.greetingText}>
-                        Hallo, <Text style={styles.userName}>{data.message.user}</Text>! 👋
-                    </Text> 
-                    :
-                    <Text style={styles.sadText}>:-(</Text>
-                }
-                {data && data.message.notes.length > 0 ? data.message.notes.map(renderNoteCard) : <Text style={styles.greetingText}>Zur Zeit sind keine öffentlichen Notizen vorhanden. 🤓</Text>}
-            </ScrollView>
+    {response ? (
+        <>
+            <Text style={styles.greetingText}>
+                Hallo, <Text style={styles.userName}>{response.message.user}</Text>! 👋
+            </Text>
+            {response.message.notes.length > 0 ? response.message.notes.map(renderNoteCard) : <Text style={styles.greetingText}>Zur Zeit sind keine öffentlichen Notizen vorhanden. 🤓</Text>}
+        </>
+    ) : <Text style={styles.sadText}>:-(</Text>}
+</ScrollView>
         </Layout>
     );
     

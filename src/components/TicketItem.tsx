@@ -1,83 +1,78 @@
 import React from 'react';
-import Realm from 'realm';
-import {View, Text, Pressable, StyleSheet} from 'react-native';
+import { View, StyleSheet, ViewProps } from 'react-native';
 
-import {shadows} from '../styles/shadows';
-import colors from '../styles/colors';
-import {Ticket} from '@src/models/Ticket';
+import { shadows } from '../styles/shadows';
+import { Ticket } from '@src/models/Ticket';
+import { Card, Divider, Layout, Text } from '@ui-kitten/components';
+import { getFormatedDate } from '@src/services/DateUtils';
 
 type TicketItemProps = {
-  ticket: Ticket & Realm.Object;
-  onToggleStatus: () => void;
-  onDelete: () => void;
+  ticket: Ticket;
 };
 
 export const TicketItem = React.memo<TicketItemProps>(
-  ({ticket, onToggleStatus, onDelete}) => {
+  ({ ticket }) => {
+    console.log(ticket);
+
+    const creationDate: string = getFormatedDate(ticket.creation);
+
+    const cardHeader = (props: ViewProps): React.ReactElement => (
+      <View {...props}>
+        <Text category='h6' style={styles.description}>
+          Ticket {ticket.name}: {ticket.subject}
+        </Text>
+      </View>
+    );
+
+    const cardFooter = (props: ViewProps): React.ReactElement => (
+      <View {...props}>
+        <Text category='c1'>
+          Created At {creationDate}
+        </Text>
+      </View>
+    );
+
     return (
-        <View style={styles.task}>
-          {/* <Pressable
-            onPress={onToggleStatus}
-            style={[styles.status, styles.completed]}>
-            <Text style={styles.icon}>{ticket.name ? '✓' : '○'}</Text>
-          </Pressable> */}
-          <View style={styles.descriptionContainer}>
-            <Text numberOfLines={1} style={styles.description}>
-              {ticket.name}
-            </Text>
-          </View>
-          <Pressable onPress={onDelete} style={styles.deleteButton}>
-            <Text style={styles.deleteText}>Delete</Text>
-          </Pressable>
-        </View>
+      <Layout style={styles.descriptionContainer}>
+        <Card
+          style={styles.card}
+          key={ticket.name}
+          header={cardHeader}
+          footer={cardFooter}
+        >
+          <Text category='p1' style={styles.description}>Status: {ticket.status}</Text>
+          <Divider />
+          <Text category='p1' style={styles.description}>Owner: {ticket.owner}</Text>
+          <Divider />
+          <Text category='p1' style={styles.description}>Type: {ticket.ticket_type}</Text>
+        </Card>
+      </Layout>
     );
   },
 );
 
 const styles = StyleSheet.create({
-  task: {
-    height: 50,
-    width: 300,
+  card: {
+    width: '90%',
     alignSelf: 'center',
-    flexDirection: 'row',
-    marginVertical: 8,
-    backgroundColor: colors.white,
-    borderRadius: 5,
-    ...shadows,
+    margin: 15,
+    borderRadius: 8,
+    backgroundColor: '#F5F5F5',
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 5,
+      height: 5,
+    }
   },
   descriptionContainer: {
     flex: 1,
-    justifyContent: 'center',
-  },
-  description: {
-    paddingHorizontal: 10,
-    color: colors.black,
-    fontSize: 17,
+    justifyContent: 'space-evenly',
+    alignItems: 'center',
+    alignContent: 'center',
     width: '100%'
   },
-  status: {
-    width: 50,
-    height: '100%',
-    justifyContent: 'center',
-    borderTopLeftRadius: 5,
-    borderBottomLeftRadius: 5,
-    backgroundColor: colors.gray,
-  },
-  completed: {
-    backgroundColor: colors.purple,
-  },
-  deleteButton: {
-    justifyContent: 'center',
-  },
-  deleteText: {
-    marginHorizontal: 10,
-    color: colors.gray,
-    fontSize: 17,
-  },
-  icon: {
-    color: colors.white,
-    textAlign: 'center',
-    fontSize: 17,
-    fontWeight: 'bold',
+  description: {
+    margin: 5,
+    maxWidth: '100%'
   },
 });

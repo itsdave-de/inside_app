@@ -9,14 +9,13 @@ import { useColorScheme } from "react-native";
 export default function AppFrappeWrapper(): React.ReactElement {
     const colorScheme = useColorScheme();
     const defaultUrl = '';
-    const defaultKey = '';
-    const defaultSecret = '';
 
     const userSettings = useObject(Settings, process.env.EXPO_PUBLIC_SETTINGS_ID);
 
-    const getUserAuthorizationTokensFromSettings = () => {
-        return `${userSettings.apiKey}:${userSettings.apiSecret}`;
-
+    const getUserAuthorizationTokensFromSettings = (): string => {
+        return userSettings
+            ? `${userSettings.apiKey}:${userSettings.apiSecret}`
+            : '';
     };
 
     return (
@@ -24,7 +23,7 @@ export default function AppFrappeWrapper(): React.ReactElement {
             url={userSettings ? userSettings.apiUrl : defaultUrl}
             tokenParams={{
                 useToken: true,
-                token: () => { return getUserAuthorizationTokensFromSettings() },
+                token: (): string => { return getUserAuthorizationTokensFromSettings()},
                 type: "token"
             }}
         >

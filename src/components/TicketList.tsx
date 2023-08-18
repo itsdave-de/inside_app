@@ -7,7 +7,7 @@ import {TicketItem} from './TicketItem';
 import { Layout } from '@ui-kitten/components';
 
 type TicketListProps = {
-  tickets: Realm.Results<Ticket & Realm.Object>;
+  tickets: Realm.Results<Ticket>;
   onToggleTaskStatus: (ticket: Ticket & Realm.Object) => void;
   onDeleteTask: (ticket: Ticket & Realm.Object) => void;
 };
@@ -18,15 +18,15 @@ export const TicketList: React.FC<TicketListProps> = ({
   onDeleteTask,
 }) => {
   return (
-    <Layout style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+    <Layout style={{ flex: 1, justifyContent: 'center', alignItems: 'center', width: '100%' }}>
         <FlatList
+          style={styles.listContainer}
           data={tickets}
-          keyExtractor={ticket => ticket.__id.toString()}
+          keyExtractor={ticket => ticket.name}
+          showsVerticalScrollIndicator={false}
           renderItem={({item}) => (
             <TicketItem
               ticket={item}
-              onToggleStatus={() => onToggleTaskStatus(item)}
-              onDelete={() => onDeleteTask(item)}
               // Don't spread the Realm item as such: {...item}
             />
           )}
@@ -38,7 +38,7 @@ export const TicketList: React.FC<TicketListProps> = ({
 const styles = StyleSheet.create({
   listContainer: {
     flex: 1,
-    justifyContent: 'center',
+    width: '100%'
   },
 });
 

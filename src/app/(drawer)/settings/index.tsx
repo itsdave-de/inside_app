@@ -108,7 +108,6 @@ export default function SettingsPage(): ReactElement {
                     <Button style={styles.button} onPress={() => saveSettings(apiKey, apiSecret, apiUrl)}>
                         Save
                     </Button>
-                    <Text>sense settings</Text>
                 </Layout>
                 : <FlatList
                     style={styles.listContainer}
@@ -207,7 +206,7 @@ const styles = StyleSheet.create({
     formContainer: {
         flex: 1,
         alignItems: 'flex-start',
-        width: '90%',
+        width: '100%',
     },
     listContainer: {
         flex: 1,

@@ -13,9 +13,7 @@ import {shadows} from '../styles/shadows';
 export const TicketManager: React.FC<{
   tickets: Realm.Results<Ticket & Realm.Object>;
   userId?: string;
-  setShowDone: (showDone: boolean) => void;
-  showDone: boolean;
-}> = ({tickets, userId, setShowDone, showDone}) => {
+}> = ({tickets, userId}) => {
   const realm = useRealm();
 
   const handleAddTask = useCallback(
@@ -79,7 +77,6 @@ export const TicketManager: React.FC<{
   return (
     <>
       <Layout style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-        <AddTaskForm onSubmit={handleAddTask} />
         {tickets.length === 0 ? (
           <IntroText />
         ) : (
@@ -90,10 +87,6 @@ export const TicketManager: React.FC<{
           />
         )}
       </Layout>
-      <View style={styles.switchPanel}>
-        <Text style={styles.switchPanelText}>Show Completed?</Text>
-        <Switch value={showDone} onValueChange={() => setShowDone(!showDone)} />
-      </View>
     </>
   );
 };
@@ -103,19 +96,5 @@ const styles = StyleSheet.create({
     flex: 1,
     paddingTop: 20,
     paddingHorizontal: 20,
-  },
-  switchPanel: {
-    flexDirection: 'row',
-    backgroundColor: '#fff',
-    padding: 10,
-    borderRadius: 5,
-    marginHorizontal: 10,
-    marginBottom: 10,
-    ...shadows,
-  },
-  switchPanelText: {
-    flex: 1,
-    fontSize: 16,
-    padding: 5,
   },
 });

@@ -12,8 +12,6 @@ type TicketItemProps = {
 
 export const TicketItem = React.memo<TicketItemProps>(
   ({ ticket }) => {
-    console.log(ticket);
-
     const creationDate: string = getFormatedDate(ticket.creation);
 
     const cardHeader = (props: ViewProps): React.ReactElement => (

@@ -3,24 +3,46 @@ import { Stack } from 'expo-router';
 import { DrawerToggleButton } from "@react-navigation/drawer";
 
 import { Ticket } from '@src/models/Ticket';
-import { useState } from 'react';
-import { useQuery } from '@realm/react';
+import { useQuery, useRealm } from '@realm/react';
 import { TicketManager } from '@src/components/TicketsManager';
+import { useFrappeGetCall } from 'frappe-react-sdk';
 
 export default function TicketsPage() {
-    const [showDone, setShowDone] = useState(false);
-    // const tickets = useQuery(
-    //     Ticket,
-    //     collection =>
-    //       showDone
-    //         ? collection.sorted('creation')
-    //         : collection.filtered('status = "done"').sorted('creation'),
-    //     [showDone],
-    //   );
+    const realm = useRealm();
+
+    const { data } = useFrappeGetCall(
+        "ssc_camp_management.inside_app_api.get_all_tickets_for_agent",
+        {},
+        null,
+        {
+            revalidateOnMount: true
+        }
+    );
+
+    if (data) {
+        data.message.forEach((ticket) => {
+            realm.write(() => {
+                return realm.create(
+                    Ticket,
+                    {
+                        name: ticket.name.toString(),
+                        subject: ticket.subject,
+                        ticket_type: ticket.ticket_type,
+                        description: ticket.description,
+                        status: ticket.status,
+                        priority: ticket.priority,
+                        agent_group: ticket.agent_group
+                    },
+                    Realm.UpdateMode.Modified
+                );
+            });
+        });
+    }
+
     const tickets = useQuery(
         Ticket,
-        collection => collection.sorted('creation')
-      );
+        (collection) => collection.sorted('creation')
+    );
 
     return (
         <Layout style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
@@ -30,7 +52,7 @@ export default function TicketsPage() {
                     headerLeft: () => <DrawerToggleButton />,
                 }}
             />
-            <TicketManager tickets={tickets} setShowDone={setShowDone} showDone={showDone} />
+            <TicketManager tickets={tickets} />
         </Layout>
     );
 }

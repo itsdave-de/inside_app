@@ -11,7 +11,7 @@ import {useRealm} from '@realm/react';
 import {shadows} from '../styles/shadows';
 
 export const TicketManager: React.FC<{
-  tickets: Realm.Results<Ticket & Realm.Object>;
+  tickets: Realm.Results<Ticket>;
   userId?: string;
 }> = ({tickets, userId}) => {
   const realm = useRealm();

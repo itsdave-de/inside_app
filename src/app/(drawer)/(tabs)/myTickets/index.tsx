@@ -5,20 +5,24 @@ import { Realm, useQuery, useRealm } from '@realm/react';
 import { TicketManager } from '@src/components/TicketsManager';
 import { DrawerToggleButton } from '@react-navigation/drawer';
 import { useFrappeGetCall } from 'frappe-react-sdk';
+import { useState } from 'react';
+import { RefreshControl } from 'react-native';
 
-export default function TicketsPage() {
+export default function MyTicketsPage() {
+    const [refreshKeyMyTickets, setRefreshKeyMyTickets] = useState(0);
+    const [refreshingMyTickets, setRefreshingMyTickets] = useState(false);
     const realm = useRealm();
 
     const { data } = useFrappeGetCall(
         "ssc_camp_management.inside_app_api.get_all_tickets_for_agent",
         {},
-        null,
+        `ssc_camp_management.inside_app_api.get_all_tickets_for_agent${refreshKeyMyTickets.toString()}`,
         {
             revalidateOnMount: true
         }
     );
 
-    if (data) {
+    if (data && Array.isArray(data.message)) {
         data.message.forEach((ticket) => {
             realm.write(() => {
                 return realm.create(
@@ -38,11 +42,17 @@ export default function TicketsPage() {
         });
     }
 
-    const tickets = useQuery(
+    const tickets: Realm.Results<Ticket> = useQuery(
         Ticket,
         // TODO: filter somehow for the user tickets
         (collection) => collection.sorted('creation')
     );
+
+    const refreshMyTicketsData = (): void => {
+        setRefreshingMyTickets(true);
+        setRefreshKeyMyTickets(oldKey => oldKey + 1);
+        setRefreshingMyTickets(false);
+    };
 
     return (
         <Layout style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
@@ -52,7 +62,12 @@ export default function TicketsPage() {
                 headerLeft: () => <DrawerToggleButton />,
             }}
             />
-            <TicketManager tickets={tickets} />
+            <TicketManager
+                tickets={tickets}
+                refreshControl={
+                    <RefreshControl refreshing={refreshingMyTickets} onRefresh={refreshMyTicketsData} />
+                }
+            />
         </Layout>
     );
 }

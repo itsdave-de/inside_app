@@ -1,14 +1,14 @@
-import {useCallback} from 'react';
-import {View, StyleSheet, Switch, Text} from 'react-native';
-import { Layout } from '@ui-kitten/components';
+import { useCallback } from 'react';
+import { View, StyleSheet, Switch, Text } from 'react-native';
+import { Icon, Layout } from '@ui-kitten/components';
 
-import {Ticket} from '@src/models/Ticket';
-import {IntroText} from './IntroText';
-import {AddTaskForm} from './AddTaskForm';
+import { Ticket } from '@src/models/Ticket';
+import { IntroText } from './IntroText';
+import { AddTaskForm } from './AddTaskForm';
 import TicketList from './TicketList';
 
-import {useRealm} from '@realm/react';
-import {shadows} from '../styles/shadows';
+import { useRealm } from '@realm/react';
+import { shadows } from '../styles/shadows';
 
 export const TicketManager: React.FC<{
   tickets: Realm.Results<Ticket>;

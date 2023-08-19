@@ -10,12 +10,14 @@ type TicketListProps = {
   tickets: Realm.Results<Ticket>;
   onToggleTaskStatus: (ticket: Ticket & Realm.Object) => void;
   onDeleteTask: (ticket: Ticket & Realm.Object) => void;
+  refreshControl?: React.ReactElement;
 };
 
 export const TicketList: React.FC<TicketListProps> = ({
   tickets,
   onToggleTaskStatus,
   onDeleteTask,
+  refreshControl,
 }) => {
   return (
     <Layout style={{ flex: 1, justifyContent: 'center', alignItems: 'center', width: '100%' }}>
@@ -24,6 +26,7 @@ export const TicketList: React.FC<TicketListProps> = ({
           data={tickets}
           keyExtractor={ticket => ticket.name}
           showsVerticalScrollIndicator={false}
+          refreshControl={refreshControl}
           renderItem={({item}) => (
             <TicketItem
               ticket={item}

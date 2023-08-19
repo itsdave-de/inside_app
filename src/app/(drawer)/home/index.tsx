@@ -17,11 +17,11 @@ export default function HomePage() {
         "ssc_camp_management.inside_app_api.get_notes_for_homescreen",
         undefined, // If no params are used
         refreshKey.toString(),
-      );
+    );
 
-      const [isLoadingRefresh, setIsLoadingRefresh] = useState(false); // Add this state
+    const [isLoadingRefresh, setIsLoadingRefresh] = useState(false); // Add this state
 
-      useEffect(() => {
+    useEffect(() => {
         if (error) {
             console.error("Ein Fehler ist aufgetreten:", error);
             setIsLoadingRefresh(false);  // Update state when there's an error
@@ -34,14 +34,13 @@ export default function HomePage() {
             setRefreshing(false);       // Stop the refresh indicator
         }
     }, [data, error, refreshKey]);
-    
+
     const handleRefresh = () => {
         setRefreshing(true);
         setIsLoadingRefresh(true); // Set refresh to loading
         setRefreshKey(prevKey => prevKey + 1);
         setRefreshing(false);    // This stops the refresh indicator, but because of isLoadingRefresh, you continue showing the old data until new data loads
     };
-    
 
     function renderNoteCard(note) {
         return (
@@ -53,10 +52,8 @@ export default function HomePage() {
     }
 
     return (
-
-          
         <Layout style={{ flex: 1 }}>
-               <Drawer.Screen
+            <Drawer.Screen
                 options={{
                     title: "Home",
                     headerShown: true,
@@ -64,26 +61,34 @@ export default function HomePage() {
                 }}
             />
 
-<ScrollView 
-    contentContainerStyle={{ justifyContent: 'flex-start', alignItems: 'center' }}
-    refreshControl={
-        <RefreshControl refreshing={refreshing} onRefresh={handleRefresh} />
-    }
->
-    {error && <Text>Ein Fehler ist aufgetreten. Bitte versuchen Sie es später erneut.</Text>}
+            <ScrollView
+                contentContainerStyle={{ justifyContent: 'flex-start', alignItems: 'center' }}
+                refreshControl={
+                    <RefreshControl refreshing={refreshing} onRefresh={handleRefresh} />
+                }
+            >
+                {error && <Text>Ein Fehler ist aufgetreten. Bitte versuchen Sie es später erneut.</Text>}
 
-    {response ? (
-        <>
-            <Text style={styles.greetingText}>
-                Hallo, <Text style={styles.userName}>{response.message.user}</Text>! 👋
-            </Text>
-            {response.message.notes.length > 0 ? response.message.notes.map(renderNoteCard) : <Text style={styles.greetingText}>Zur Zeit sind keine öffentlichen Notizen vorhanden. 🤓</Text>}
-        </>
-    ) : <Text style={styles.sadText}>:-(</Text>}
-</ScrollView>
+                {
+                    response
+                        ? (
+                            <>
+                                <Text style={styles.greetingText}>
+                                    Hallo, <Text style={styles.userName}>{response.message.user}</Text>! 👋
+                                </Text>
+                                {
+                                    (response.message && response.message?.notes?.length > 0)
+                                        ? response.message.notes.map(renderNoteCard)
+                                        : <Text style={styles.greetingText}>Zur Zeit sind keine öffentlichen Notizen vorhanden. 🤓</Text>
+                                }
+                            </>
+                          )
+                        : <Text style={styles.sadText}>:-(</Text>
+                }
+            </ScrollView>
         </Layout>
     );
-    
+
 }
 
 const styles = StyleSheet.create({
@@ -124,7 +129,7 @@ const styles = StyleSheet.create({
         color: '#333',
         textAlign: 'center',
         marginVertical: 15,
-        
+
     },
     userName: {
         color: '#007AFF',  // Ein ansprechendes Blau

@@ -11,9 +11,10 @@ import {useRealm} from '@realm/react';
 import {shadows} from '../styles/shadows';
 
 export const TicketManager: React.FC<{
-  tickets: Realm.Results<Ticket & Realm.Object>;
+  tickets: Realm.Results<Ticket>;
   userId?: string;
-}> = ({tickets, userId}) => {
+  refreshControl?: React.ReactElement;
+}> = ({ tickets, userId, refreshControl }) => {
   const realm = useRealm();
 
   const handleAddTask = useCallback(
@@ -84,6 +85,7 @@ export const TicketManager: React.FC<{
             tickets={tickets}
             onToggleTaskStatus={() => {}}
             onDeleteTask={handleDeleteTask}
+            refreshControl={refreshControl}
           />
         )}
       </Layout>

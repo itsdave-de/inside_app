@@ -5,7 +5,7 @@ import { Realm, useQuery, useRealm } from '@realm/react';
 import { TicketManager } from '@src/components/TicketsManager';
 import { DrawerToggleButton } from '@react-navigation/drawer';
 import { useFrappeGetCall } from 'frappe-react-sdk';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { RefreshControl } from 'react-native';
 
 export default function MyTicketsPage() {
@@ -22,25 +22,28 @@ export default function MyTicketsPage() {
         }
     );
 
-    if (data && Array.isArray(data.message)) {
-        data.message.forEach((ticket) => {
-            realm.write(() => {
-                return realm.create(
-                    Ticket,
-                    {
-                        name: ticket.name.toString(),
-                        subject: ticket.subject,
-                        ticket_type: ticket.ticket_type,
-                        description: ticket.description,
-                        status: ticket.status,
-                        priority: ticket.priority,
-                        agent_group: ticket.agent_group
-                    },
-                    Realm.UpdateMode.Modified
-                );
+    useEffect(() => {
+        if (data && Array.isArray(data.message)) {
+            data.message.forEach((ticket) => {
+                realm.write(() => {
+                    return realm.create(
+                        Ticket,
+                        {
+                            name: ticket.name.toString(),
+                            subject: ticket.subject,
+                            ticket_type: ticket.ticket_type,
+                            description: ticket.description,
+                            status: ticket.status,
+                            priority: ticket.priority,
+                            agent_group: ticket.agent_group,
+                            __lastPull: new Date(),
+                        },
+                        Realm.UpdateMode.Modified
+                    );
+                });
             });
-        });
-    }
+        }
+    }, [data]); // Only execute the effect when the 'data' changes
 
     const tickets: Realm.Results<Ticket> = useQuery(
         Ticket,

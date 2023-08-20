@@ -3,40 +3,44 @@ import { View, StyleSheet, Switch, Text } from 'react-native';
 import { Icon, Layout } from '@ui-kitten/components';
 
 import { Ticket } from '@src/models/Ticket';
-import { IntroText } from './IntroText';
-import { AddTaskForm } from './AddTaskForm';
 import TicketList from './TicketList';
 
 import { useRealm } from '@realm/react';
-import { shadows } from '../styles/shadows';
+import { BSON } from 'realm';
 
 export const TicketManager: React.FC<{
   tickets: Realm.Results<Ticket>;
-  userId?: string;
   refreshControl?: React.ReactElement;
-}> = ({ tickets, userId, refreshControl }) => {
+}> = ({ tickets, refreshControl }) => {
   const realm = useRealm();
 
-  const handleAddTask = useCallback(
-    (name: string): void => {
-      if (!name) {
-        return;
-      }
-
-      // Everything in the function passed to "realm.write" is a transaction and will
-      // hence succeed or fail together. A transcation is the smallest unit of transfer
-      // in Realm so we want to be mindful of how much we put into one single transaction
-      // and split them up if appropriate (more commonly seen server side). Since clients
-      // may occasionally be online during short time spans we want to increase the probability
-      // of sync participants to successfully sync everything in the transaction, otherwise
-      // no changes propagate and the transaction needs to start over when connectivity allows.
+  const handleAddTicket = useCallback(
+    (
+      subject: string,
+      ticketType: string,
+      description: string,
+      status: string,
+      priority: string,
+      agentGroup: string
+    ): void => {
       realm.write(() => {
-        return realm.create(Ticket, {
-          name
-        });
+        return realm.create(
+          Ticket,
+          {
+            name: `local-${new BSON.UUID().toString()}`,
+            subject: subject,
+            ticket_type: ticketType,
+            description: description,
+            status: status,
+            priority: priority,
+            agent_group: agentGroup,
+            __lastEdit: new Date(),
+          },
+          Realm.UpdateMode.Modified
+        );
       });
     },
-    [realm, userId],
+    [realm],
   );
 
   // const handleToggleTaskStatus = useCallback(
@@ -78,16 +82,12 @@ export const TicketManager: React.FC<{
   return (
     <>
       <Layout style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-        {tickets.length === 0 ? (
-          <IntroText />
-        ) : (
-          <TicketList
-            tickets={tickets}
-            onToggleTaskStatus={() => {}}
-            onDeleteTask={handleDeleteTask}
-            refreshControl={refreshControl}
-          />
-        )}
+        <TicketList
+          tickets={tickets}
+          handleAddTicket={handleAddTicket}
+          onDeleteTask={handleDeleteTask}
+          refreshControl={refreshControl}
+        />
       </Layout>
     </>
   );

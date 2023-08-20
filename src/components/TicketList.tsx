@@ -1,8 +1,8 @@
-import React, { useRef } from 'react';
-import { FlatList, StyleSheet, TouchableOpacity, View } from 'react-native';
+import { useRef, useState } from 'react';
+import { FlatList, StyleSheet, TouchableOpacity, View, Dimensions } from 'react-native';
 import { Realm } from '@realm/react';
-import { Layout, useTheme, Input, Button } from '@ui-kitten/components';
-import { BottomSheetModal, BottomSheetModalProvider, useBottomSheetSpringConfigs, useBottomSheetTimingConfigs } from '@gorhom/bottom-sheet';
+import { Layout, useTheme, Input, Button, Text } from '@ui-kitten/components';
+import { BottomSheetModal, BottomSheetModalProvider, useBottomSheetTimingConfigs } from '@gorhom/bottom-sheet';
 
 import { Ticket } from '@src/models/Ticket';
 import { TicketItem } from './TicketItem';
@@ -11,18 +11,61 @@ import { Easing } from 'react-native-reanimated';
 
 type TicketListProps = {
   tickets: Realm.Results<Ticket>;
-  onToggleTaskStatus: (ticket: Ticket & Realm.Object) => void;
+  handleAddTicket: (
+    subject: string,
+    ticketType: string,
+    description: string,
+    status: string,
+    priority: string,
+    agentGroup: string
+  ) => void;
   onDeleteTask: (ticket: Ticket & Realm.Object) => void;
   refreshControl?: React.ReactElement;
 };
 
+const windowWidth = Dimensions.get('window').width;
+const windowHeight = Dimensions.get('window').height;
+
 export const TicketList: React.FC<TicketListProps> = ({
   tickets,
-  onToggleTaskStatus,
+  handleAddTicket,
   onDeleteTask,
   refreshControl,
 }) => {
   const theme = useTheme();
+
+  // ###> Form
+  const [subject, setSubject] = useState<string>('');
+  const [ticketType, setTicketType] = useState<string>('');
+  const [description, setDescription] = useState<string>('');
+  const [status, setStatus] = useState<string>('');
+  const [priority, setPriority] = useState<string>('');
+  const [agentGroup, setAgentGroup] = useState<string>('');
+
+  const resetFormValues = (): void => {
+    setSubject('');
+    setTicketType('');
+    setDescription('');
+    setStatus('');
+    setPriority('');
+    setAgentGroup('');
+  };
+
+  const handleAddTicketPress = (): void => {
+    closeBottomSheet();
+    setTimeout(() => {
+      handleAddTicket(
+        subject,
+        ticketType,
+        description,
+        status,
+        priority,
+        agentGroup
+      );
+      resetFormValues();
+    }, 700); // Wait for the bottom sheet to close before adding the task
+  };
+  // ###< Form
 
   // ###> Bottom Sheet configurations and functions
   const bottomSheetModalRef = useRef<BottomSheetModal>(null);
@@ -43,19 +86,37 @@ export const TicketList: React.FC<TicketListProps> = ({
 
   return (
     <Layout style={styles.layoutContainer}>
-      <FlatList
-        style={styles.listContainer}
-        data={tickets}
-        keyExtractor={ticket => ticket.name}
-        showsVerticalScrollIndicator={false}
-        refreshControl={refreshControl}
-        renderItem={({ item }) => (
-          <TicketItem
-            ticket={item}
-          // Don't spread the Realm item as such: {...item}
-          />
-        )}
-      />
+      {
+        tickets.length === 0
+          ? (
+            <FlatList
+              style={styles.listContainer}
+              data={tickets}
+              keyExtractor={() => 'No tickets'}
+              showsVerticalScrollIndicator={false}
+              refreshControl={refreshControl}
+              renderItem={({ item }) => (
+                <Text>No tickets</Text>
+              )}
+            />
+          )
+          : (
+            <FlatList
+              style={styles.listContainer}
+              data={tickets}
+              keyExtractor={ticket => ticket.name}
+              showsVerticalScrollIndicator={false}
+              refreshControl={refreshControl}
+              renderItem={({ item }) => (
+                <TicketItem
+                  ticket={item}
+                // Don't spread the Realm item as such: {...item}
+                />
+              )}
+            />
+          )
+      }
+
       <TouchableOpacity
         style={styles.floatingIcon}
         onPress={openBottomSheet}
@@ -84,39 +145,50 @@ export const TicketList: React.FC<TicketListProps> = ({
                 size='medium'
                 label='Subject'
                 placeholder='Place your Text'
+                onChangeText={nextValue => setSubject(nextValue)}
               />
               <Input
                 style={styles.inputContainer}
                 size='medium'
                 label='Ticket Type'
                 placeholder='Place your Text'
+                onChangeText={nextValue => setTicketType(nextValue)}
               />
               <Input
                 style={styles.inputContainer}
                 size='medium'
                 label='Description'
                 placeholder='Place your Text'
+                onChangeText={nextValue => setDescription(nextValue)}
               />
               <Input
                 style={styles.inputContainer}
                 size='medium'
                 label='Status'
                 placeholder='Place your Text'
+                onChangeText={nextValue => setStatus(nextValue)}
               />
               <Input
                 style={styles.inputContainer}
                 size='medium'
                 label='Priority'
                 placeholder='Place your Text'
+                onChangeText={nextValue => setPriority(nextValue)}
               />
               <Input
                 style={styles.inputContainer}
                 size='medium'
                 label='Agent Group'
                 placeholder='Place your Text'
+                onChangeText={nextValue => setAgentGroup(nextValue)}
               />
 
-              <Button style={styles.addTicketButton} onPress={closeBottomSheet}>Add Ticket</Button>
+              <Button
+                style={styles.addTicketButton}
+                onPress={() => handleAddTicketPress()}
+              >
+                Add Ticket
+              </Button>
             </Layout>
           </Layout>
         </BottomSheetModal>
@@ -128,14 +200,14 @@ export const TicketList: React.FC<TicketListProps> = ({
 const styles = StyleSheet.create({
   layoutContainer: {
     position: 'relative',
-    height: '100%',
+    height: windowHeight,
     flex: 1,
     justifyContent: 'center',
-    width: '100%',
+    width: windowWidth,
   },
   listContainer: {
     flex: 1,
-    width: '100%',
+    width: windowWidth,
   },
   icon: {
     width: 60,
@@ -163,7 +235,7 @@ const styles = StyleSheet.create({
     borderTopLeftRadius: 16,
     borderTopRightRadius: 16,
     width: '95%',
-    height: '100%',
+    height: windowHeight,
     alignSelf: 'center',
   },
   formContainer: {

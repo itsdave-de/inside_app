@@ -16,7 +16,9 @@ export class Ticket extends Realm.Object<Ticket> {
   description?: string = '';
   creation?: Date = new Date();
 
-  __lastPull: Date = new Date();
+  __lastPull?: Date = null;
+  __lastEdit?: Date = null;
+  __changes?: Array<object> | null = null;
 
   static primaryKey = 'name';
 }

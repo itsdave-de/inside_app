@@ -1,5 +1,5 @@
 import { Stack } from 'expo-router';
 
-export default function MyTicketsLayout() {
+export default function TicketsLayout() {
   return <Stack />;
 }

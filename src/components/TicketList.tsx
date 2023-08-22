@@ -1,13 +1,14 @@
 import { useRef, useState } from 'react';
-import { FlatList, StyleSheet, TouchableOpacity, View, Dimensions } from 'react-native';
+import { FlatList, StyleSheet, TouchableOpacity, View, Dimensions, Pressable } from 'react-native';
 import { Realm } from '@realm/react';
-import { Layout, useTheme, Input, Button, Text } from '@ui-kitten/components';
+import { Layout, useTheme, Input, Button, Text, Toggle } from '@ui-kitten/components';
 import { BottomSheetModal, BottomSheetModalProvider, useBottomSheetTimingConfigs } from '@gorhom/bottom-sheet';
 
 import { Ticket } from '@src/models/Ticket';
 import { TicketItem } from './TicketItem';
 import { Icon } from '@ui-kitten/components';
 import { Easing } from 'react-native-reanimated';
+import { TicketsFilters } from '@src/types/TicketsFilterType';
 
 type TicketListProps = {
   tickets: Realm.Results<Ticket>;
@@ -21,6 +22,8 @@ type TicketListProps = {
   ) => void;
   onDeleteTask: (ticket: Ticket & Realm.Object) => void;
   refreshControl?: React.ReactElement;
+  onFilterChange: (filterName: keyof TicketsFilters, value: boolean) => void;
+  filter: TicketsFilters;
 };
 
 const windowWidth = Dimensions.get('window').width;
@@ -31,6 +34,8 @@ export const TicketList: React.FC<TicketListProps> = ({
   handleAddTicket,
   onDeleteTask,
   refreshControl,
+  onFilterChange,
+  filter,
 }) => {
   const theme = useTheme();
 
@@ -67,7 +72,7 @@ export const TicketList: React.FC<TicketListProps> = ({
   };
   // ###< Form
 
-  // ###> Bottom Sheet configurations and functions
+  // ###> Bottom Sheet configurations and functions to add a new ticket
   const bottomSheetModalRef = useRef<BottomSheetModal>(null);
 
   const animationConfigs = useBottomSheetTimingConfigs({
@@ -83,6 +88,18 @@ export const TicketList: React.FC<TicketListProps> = ({
     bottomSheetModalRef.current?.dismiss();
   };
   // ###< Bottom Sheet configurations and functions
+
+  // ###> Filter
+  const filterSheetModalRef = useRef<BottomSheetModal>(null);
+
+  const openFilterSheet = () => {
+    filterSheetModalRef.current?.present();
+  };
+
+  const closeFilterSheet = () => {
+    filterSheetModalRef.current?.dismiss();
+  };
+  // ###< Filter
 
   return (
     <Layout style={styles.layoutContainer}>
@@ -101,19 +118,27 @@ export const TicketList: React.FC<TicketListProps> = ({
             />
           )
           : (
-            <FlatList
-              style={styles.listContainer}
-              data={tickets}
-              keyExtractor={ticket => ticket.name}
-              showsVerticalScrollIndicator={false}
-              refreshControl={refreshControl}
-              renderItem={({ item }) => (
-                <TicketItem
-                  ticket={item}
-                // Don't spread the Realm item as such: {...item}
+            <>
+              <Pressable onPress={openFilterSheet}>
+                <Icon
+                  name="funnel"
+                  style={[styles.filterIcon, { tintColor: theme['color-primary-default'] }]}
                 />
-              )}
-            />
+              </Pressable>
+              <FlatList
+                style={styles.listContainer}
+                data={tickets}
+                keyExtractor={ticket => ticket.name}
+                showsVerticalScrollIndicator={false}
+                refreshControl={refreshControl}
+                renderItem={({ item }) => (
+                  <TicketItem
+                    ticket={item}
+                  // Don't spread the Realm item as such: {...item}
+                  />
+                )}
+              />
+            </>
           )
       }
 
@@ -140,43 +165,46 @@ export const TicketList: React.FC<TicketListProps> = ({
           <Layout style={styles.bottomSheetContainer}>
 
             <Layout style={styles.formContainer}>
+              <Text category='h5' style={styles.heading}>
+                Add a new Ticket
+              </Text>
               <Input
-                style={styles.inputContainer}
+                style={styles.formElements}
                 size='medium'
                 label='Subject'
                 placeholder='Place your Text'
                 onChangeText={nextValue => setSubject(nextValue)}
               />
               <Input
-                style={styles.inputContainer}
+                style={styles.formElements}
                 size='medium'
                 label='Ticket Type'
                 placeholder='Place your Text'
                 onChangeText={nextValue => setTicketType(nextValue)}
               />
               <Input
-                style={styles.inputContainer}
+                style={styles.formElements}
                 size='medium'
                 label='Description'
                 placeholder='Place your Text'
                 onChangeText={nextValue => setDescription(nextValue)}
               />
               <Input
-                style={styles.inputContainer}
+                style={styles.formElements}
                 size='medium'
                 label='Status'
                 placeholder='Place your Text'
                 onChangeText={nextValue => setStatus(nextValue)}
               />
               <Input
-                style={styles.inputContainer}
+                style={styles.formElements}
                 size='medium'
                 label='Priority'
                 placeholder='Place your Text'
                 onChangeText={nextValue => setPriority(nextValue)}
               />
               <Input
-                style={styles.inputContainer}
+                style={styles.formElements}
                 size='medium'
                 label='Agent Group'
                 placeholder='Place your Text'
@@ -184,10 +212,62 @@ export const TicketList: React.FC<TicketListProps> = ({
               />
 
               <Button
-                style={styles.addTicketButton}
+                style={styles.bottomSheetButton}
                 onPress={() => handleAddTicketPress()}
               >
                 Add Ticket
+              </Button>
+            </Layout>
+          </Layout>
+        </BottomSheetModal>
+        <BottomSheetModal
+          ref={filterSheetModalRef}
+          snapPoints={['25%', '50%', '95%']}
+          index={2}
+          backgroundComponent={({ style }) => (
+            <View style={[style, styles.bottomSheetBackground]} />
+          )}
+          animationConfigs={animationConfigs}
+        >
+          <Layout style={styles.bottomSheetContainer}>
+            <Layout style={styles.formContainer}>
+              <Text category='h5' style={styles.heading}>
+                Apply filters
+              </Text>
+              <Toggle
+                style={styles.formElements}
+                checked={filter.myTickets}
+                onChange={(value) => {
+                  onFilterChange('myTickets', value);
+                }}
+              >
+                My Tickets
+              </Toggle>
+              <Toggle
+                style={styles.formElements}
+                checked={filter.openTickets}
+                onChange={(value) => {
+                  onFilterChange('openTickets', value);
+                }}
+              >
+                Open Tickets
+              </Toggle>
+              <Toggle
+                style={styles.formElements}
+                checked={filter.closedTickets}
+                onChange={(value) => {
+                  onFilterChange('closedTickets', value);
+                }}
+              >
+                Closed Tickets
+              </Toggle>
+              <Button
+                style={styles.bottomSheetButton}
+                onPress={() => {
+                  closeFilterSheet();
+                }}
+              >
+                Apply Filters
               </Button>
             </Layout>
           </Layout>
@@ -212,6 +292,13 @@ const styles = StyleSheet.create({
   icon: {
     width: 60,
     height: 60,
+  },
+  filterIcon: {
+    width: 35,
+    height: 35,
+    alignSelf: 'flex-end',
+    marginTop: 15,
+    marginRight: 15,
   },
   floatingIcon: {
     position: 'absolute',
@@ -238,15 +325,18 @@ const styles = StyleSheet.create({
     height: windowHeight,
     alignSelf: 'center',
   },
+  heading: {
+    alignSelf: 'center',
+  },
   formContainer: {
     flex: 1,
     alignItems: 'flex-start',
     width: '100%',
   },
-  inputContainer: {
+  formElements: {
     margin: 10
   },
-  addTicketButton: {
+  bottomSheetButton: {
     alignSelf: 'center',
     width: '95%',
     margin: 10

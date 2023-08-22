@@ -1,23 +1,40 @@
 import { Layout } from '@ui-kitten/components';
 import { Stack } from 'expo-router';
-import { DrawerToggleButton } from "@react-navigation/drawer";
-
 import { Ticket } from '@src/models/Ticket';
-import { useQuery, useRealm } from '@realm/react';
+import { Realm, useQuery, useRealm } from '@realm/react';
 import { TicketManager } from '@src/components/TicketsManager';
+import { DrawerToggleButton } from '@react-navigation/drawer';
 import { useFrappeGetCall } from 'frappe-react-sdk';
 import { useEffect, useState } from 'react';
-import { RefreshControl } from 'react-native-gesture-handler';
+import { RefreshControl } from 'react-native';
+import { TicketsFilters } from '@src/types/TicketsFilterType';
 
-export default function AllTicketsPage() {
-    const [refreshKeyAllTickets, setRefreshKeyAllTickets] = useState(0);
-    const [refreshingAllTickets, setRefreshingAllTickets] = useState(false);
+export default function TicketsPage() {
+    const [refreshKeyTickets, setRefreshKeyTickets] = useState(0);
+    const [refreshingTickets, setRefreshingTickets] = useState(false);
+    const [filter, setFilter] = useState<TicketsFilters>({
+        myTickets: false,
+        openTickets: false,
+        closedTickets: false
+    });
+
+    const handleFilterChange = (
+        filterName: keyof TicketsFilters,
+        value: boolean
+    ) => {
+        setFilter((prevFilter) => ({
+            ...prevFilter,
+            [filterName]: value
+        }));
+    };
+
+
     const realm = useRealm();
 
     const { data } = useFrappeGetCall(
         "ssc_camp_management.inside_app_api.get_all_tickets_for_agent",
         {},
-        `ssc_camp_management.inside_app_api.get_all_tickets_for_agent${refreshKeyAllTickets.toString()}`,
+        `ssc_camp_management.inside_app_api.get_all_tickets_for_agent${refreshKeyTickets.toString()}`,
         {
             revalidateOnMount: true
         }
@@ -48,28 +65,46 @@ export default function AllTicketsPage() {
 
     const tickets: Realm.Results<Ticket> = useQuery(
         Ticket,
-        (collection) => collection.sorted('creation')
+        (collection) => {
+            let query = collection.sorted('creation');
+
+            if (filter.myTickets) {
+                query = query.filtered('agent_group = "myTickets"');
+            }
+
+            if (filter.openTickets) {
+                query = query.filtered('status = "Open"');
+            }
+
+            if (filter.closedTickets) {
+                query = query.filtered('status = "Closed"');
+            }
+            return query;
+        },
+        [filter, data]
     );
 
-    const refreshAllTicketsData = (): void => {
-        setRefreshingAllTickets(true);
-        setRefreshKeyAllTickets(oldKey => oldKey + 1);
-        setRefreshingAllTickets(false);
+    const refreshTicketsData = (): void => {
+        setRefreshingTickets(true);
+        setRefreshKeyTickets(oldKey => oldKey + 1);
+        setRefreshingTickets(false);
     };
 
     return (
         <Layout style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
             <Stack.Screen options={{
                 headerShown: true,
-                title: "All Tickets",
+                title: "Tickets",
                 headerLeft: () => <DrawerToggleButton />,
             }}
             />
             <TicketManager
                 tickets={tickets}
                 refreshControl={
-                    <RefreshControl refreshing={refreshingAllTickets} onRefresh={refreshAllTicketsData} />
+                    <RefreshControl refreshing={refreshingTickets} onRefresh={refreshTicketsData} />
                 }
+                onFilterChange={handleFilterChange}
+                filter={filter}
             />
         </Layout>
     );

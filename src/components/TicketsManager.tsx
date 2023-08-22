@@ -17,26 +17,27 @@ export const TicketManager: React.FC<{
 }> = ({ tickets, refreshControl, onFilterChange, filter }) => {
   const realm = useRealm();
 
-  const handleAddTicket = useCallback(
+  const handleAddOrEditTicket = useCallback(
     (
-      subject: string,
-      ticketType: string,
-      description: string,
-      status: string,
-      priority: string,
-      agentGroup: string
+      name: string | null,
+      subject: string | null,
+      ticketType: string | null,
+      description: string | null,
+      status: string | null,
+      priority: string | null,
+      agentGroup: string | null
     ): void => {
       realm.write(() => {
         return realm.create(
           Ticket,
           {
-            name: `local-${new BSON.UUID().toString()}`,
-            subject: subject,
-            ticket_type: ticketType,
-            description: description,
-            status: status,
-            priority: priority,
-            agent_group: agentGroup,
+            name: name ?? `local-${new BSON.UUID().toString()}`,
+            subject: subject ?? '',
+            ticket_type: ticketType ?? '',
+            description: description ?? '',
+            status: status ?? '',
+            priority: priority ?? '',
+            agent_group: agentGroup ?? '',
             __lastEdit: new Date(),
           },
           Realm.UpdateMode.Modified
@@ -87,7 +88,7 @@ export const TicketManager: React.FC<{
       <Layout style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
         <TicketList
           tickets={tickets}
-          handleAddTicket={handleAddTicket}
+          handleAddOrEditTicket={handleAddOrEditTicket}
           onDeleteTask={handleDeleteTask}
           refreshControl={refreshControl}
           filter={filter}

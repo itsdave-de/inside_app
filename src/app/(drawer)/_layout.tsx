@@ -24,7 +24,7 @@ export default function DrawerLayout() {
             >
             </Drawer.Screen>
             <Drawer.Screen
-                name="(tabs)"
+                name="tickets"
                 options={{
                     drawerLabel: "Tickets",
                     title: "Tickets",

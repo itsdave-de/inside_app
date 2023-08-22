@@ -7,11 +7,14 @@ import TicketList from './TicketList';
 
 import { useRealm } from '@realm/react';
 import { BSON } from 'realm';
+import { TicketsFilters } from '@src/types/TicketsFilterType';
 
 export const TicketManager: React.FC<{
   tickets: Realm.Results<Ticket>;
   refreshControl?: React.ReactElement;
-}> = ({ tickets, refreshControl }) => {
+  onFilterChange: (filterName: keyof TicketsFilters, value: boolean) => void;
+  filter: TicketsFilters;
+}> = ({ tickets, refreshControl, onFilterChange, filter }) => {
   const realm = useRealm();
 
   const handleAddTicket = useCallback(
@@ -87,6 +90,8 @@ export const TicketManager: React.FC<{
           handleAddTicket={handleAddTicket}
           onDeleteTask={handleDeleteTask}
           refreshControl={refreshControl}
+          filter={filter}
+          onFilterChange={onFilterChange}
         />
       </Layout>
     </>

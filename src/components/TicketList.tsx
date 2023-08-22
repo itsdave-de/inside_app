@@ -12,7 +12,8 @@ import { TicketsFilters } from '@src/types/TicketsFilterType';
 
 type TicketListProps = {
   tickets: Realm.Results<Ticket>;
-  handleAddTicket: (
+  handleAddOrEditTicket: (
+    name: string | null,
     subject: string,
     ticketType: string,
     description: string,
@@ -33,7 +34,7 @@ const windowHeight = Dimensions.get('window').height;
 
 export const TicketList: React.FC<TicketListProps> = ({
   tickets,
-  handleAddTicket,
+  handleAddOrEditTicket,
   onDeleteTask,
   refreshControl,
   onFilterChange,
@@ -64,16 +65,29 @@ export const TicketList: React.FC<TicketListProps> = ({
     setAgentGroup('');
   };
 
-  const handleAddTicketPress = (): void => {
+  const handleAddOrEditTicketPress = (): void => {
     closeBottomSheet();
     setTimeout(() => {
-      handleAddTicket(
-        subject,
-        ticketType,
-        description,
-        status,
-        priority,
-        agentGroup
+      handleAddOrEditTicket(
+        selectedTicket?.name,
+        subject !== ''
+          ? subject
+          : selectedTicket?.subject,
+        ticketType !== ''
+          ? ticketType
+          : selectedTicket?.ticket_type,
+        description !== ''
+          ? description
+          : selectedTicket?.description,
+        status !== ''
+          ? status
+          : selectedTicket?.status,
+        priority !== ''
+          ? priority
+          : selectedTicket?.priority,
+        agentGroup !== ''
+          ? agentGroup
+          : selectedTicket?.agent_group,
       );
       resetFormValues();
     }, 700); // Wait for the bottom sheet to close before adding the task
@@ -100,6 +114,13 @@ export const TicketList: React.FC<TicketListProps> = ({
     setBottomSheetTitle('View Ticket');
     setBottomSheetCTA('Close');
     setBottomSheetAction('view');
+    bottomSheetModalRef.current?.present();
+  };
+
+  const openEditTicketBottomSheet = () => {
+    setBottomSheetTitle('Edit Ticket');
+    setBottomSheetCTA('Save');
+    setBottomSheetAction('edit');
     bottomSheetModalRef.current?.present();
   };
 
@@ -155,6 +176,7 @@ export const TicketList: React.FC<TicketListProps> = ({
                     // Don't spread the Realm item as such: {...item}
                     ticket={item}
                     openViewTicketBottomSheet={openViewTicketBottomSheet}
+                    openEditTicketBottomSheet={openEditTicketBottomSheet}
                     setSelectedTicket={setSelectedTicket}
                   />
                 )}
@@ -189,7 +211,7 @@ export const TicketList: React.FC<TicketListProps> = ({
               <Text category='h5' style={styles.heading}>
                 {bottomSheetTitle}
               </Text>
-              {(bottomSheetAction === 'view') && selectedTicket &&
+              {(bottomSheetAction === 'view' || bottomSheetAction === 'edit') && selectedTicket &&
                 <Input
                   style={styles.formElements}
                   size='medium'
@@ -250,7 +272,7 @@ export const TicketList: React.FC<TicketListProps> = ({
               <Button
                 style={styles.bottomSheetButton}
                 onPress={() => {
-                  (bottomSheetAction === 'add')
+                  (bottomSheetAction === 'add') || (bottomSheetAction === 'edit')
                     ? handleAddOrEditTicketPress()
                     : closeBottomSheet();
                 }}

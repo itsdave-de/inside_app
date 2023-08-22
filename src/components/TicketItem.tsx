@@ -1,7 +1,6 @@
 import React from 'react';
 import { View, StyleSheet, ViewProps, Pressable } from 'react-native';
 
-import { shadows } from '../styles/shadows';
 import { Ticket } from '@src/models/Ticket';
 import { Card, Divider, Icon, Layout, Text, useTheme } from '@ui-kitten/components';
 import { getFormatedDate } from '@src/services/DateUtils';
@@ -9,11 +8,12 @@ import { getFormatedDate } from '@src/services/DateUtils';
 type TicketItemProps = {
   ticket: Ticket;
   openViewTicketBottomSheet: () => void;
+  openEditTicketBottomSheet: () => void;
   setSelectedTicket: React.Dispatch<React.SetStateAction<Ticket | null>>;
 };
 
 export const TicketItem = React.memo<TicketItemProps>(
-  ({ ticket, openViewTicketBottomSheet, setSelectedTicket }) => {
+  ({ ticket, openViewTicketBottomSheet, openEditTicketBottomSheet, setSelectedTicket }) => {
     const theme = useTheme();
 
     const creationDate: string = getFormatedDate(ticket.creation);
@@ -32,6 +32,16 @@ export const TicketItem = React.memo<TicketItemProps>(
           Created At {creationDate}
         </Text>
         <View style={styles.actionsContainer}>
+          <Pressable onPress={() => {
+            setSelectedTicket(ticket);
+            openEditTicketBottomSheet();
+          }}
+          >
+            <Icon
+              name="edit"
+              style={[styles.icon, { tintColor: theme['color-primary-default'] }]}
+            />
+          </Pressable>
           <Pressable onPress={() => {
             setSelectedTicket(ticket);
             openViewTicketBottomSheet();

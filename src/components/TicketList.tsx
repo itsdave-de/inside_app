@@ -26,6 +26,8 @@ type TicketListProps = {
   filter: TicketsFilters;
 };
 
+type BottomSheetAction = 'add' | 'edit' | 'view';
+
 const windowWidth = Dimensions.get('window').width;
 const windowHeight = Dimensions.get('window').height;
 
@@ -40,6 +42,11 @@ export const TicketList: React.FC<TicketListProps> = ({
   const theme = useTheme();
 
   // ###> Form
+  const [bottomSheetTitle, setBottomSheetTitle] = useState<string>('Add a new Ticket');
+  const [bottomSheetCTA, setBottomSheetCTA] = useState<string>('Add Ticket');
+  const [bottomSheetAction, setBottomSheetAction] = useState<BottomSheetAction>('add');
+
+  const [selectedTicket, setSelectedTicket] = useState<Ticket & Realm.Object | null>(null);
   const [subject, setSubject] = useState<string>('');
   const [ticketType, setTicketType] = useState<string>('');
   const [description, setDescription] = useState<string>('');
@@ -48,6 +55,7 @@ export const TicketList: React.FC<TicketListProps> = ({
   const [agentGroup, setAgentGroup] = useState<string>('');
 
   const resetFormValues = (): void => {
+    setSelectedTicket(null);
     setSubject('');
     setTicketType('');
     setDescription('');
@@ -72,7 +80,7 @@ export const TicketList: React.FC<TicketListProps> = ({
   };
   // ###< Form
 
-  // ###> Bottom Sheet configurations and functions to add a new ticket
+  // ###> Bottom Sheet configurations and functions to add, view or edit a new ticket
   const bottomSheetModalRef = useRef<BottomSheetModal>(null);
 
   const animationConfigs = useBottomSheetTimingConfigs({
@@ -80,7 +88,18 @@ export const TicketList: React.FC<TicketListProps> = ({
     easing: Easing.elastic(0.9),
   });
 
-  const openBottomSheet = () => {
+  const openAddTicketBottomSheet = () => {
+    resetFormValues();
+    setBottomSheetTitle('Add a new Ticket');
+    setBottomSheetCTA('Add Ticket');
+    setBottomSheetAction('add');
+    bottomSheetModalRef.current?.present();
+  };
+
+  const openViewTicketBottomSheet = () => {
+    setBottomSheetTitle('View Ticket');
+    setBottomSheetCTA('Close');
+    setBottomSheetAction('view');
     bottomSheetModalRef.current?.present();
   };
 
@@ -133,8 +152,10 @@ export const TicketList: React.FC<TicketListProps> = ({
                 refreshControl={refreshControl}
                 renderItem={({ item }) => (
                   <TicketItem
+                    // Don't spread the Realm item as such: {...item}
                     ticket={item}
-                  // Don't spread the Realm item as such: {...item}
+                    openViewTicketBottomSheet={openViewTicketBottomSheet}
+                    setSelectedTicket={setSelectedTicket}
                   />
                 )}
               />
@@ -144,7 +165,7 @@ export const TicketList: React.FC<TicketListProps> = ({
 
       <TouchableOpacity
         style={styles.floatingIcon}
-        onPress={openBottomSheet}
+        onPress={openAddTicketBottomSheet}
       >
         <Icon
           name="plus-circle"
@@ -166,12 +187,22 @@ export const TicketList: React.FC<TicketListProps> = ({
 
             <Layout style={styles.formContainer}>
               <Text category='h5' style={styles.heading}>
-                Add a new Ticket
+                {bottomSheetTitle}
               </Text>
+              {(bottomSheetAction === 'view') && selectedTicket &&
+                <Input
+                  style={styles.formElements}
+                  size='medium'
+                  label='Name'
+                  value={selectedTicket?.name}
+                  disabled={true}
+                />
+              }
               <Input
                 style={styles.formElements}
                 size='medium'
                 label='Subject'
+                value={selectedTicket?.subject}
                 placeholder='Place your Text'
                 onChangeText={nextValue => setSubject(nextValue)}
               />
@@ -179,6 +210,7 @@ export const TicketList: React.FC<TicketListProps> = ({
                 style={styles.formElements}
                 size='medium'
                 label='Ticket Type'
+                value={selectedTicket?.ticket_type}
                 placeholder='Place your Text'
                 onChangeText={nextValue => setTicketType(nextValue)}
               />
@@ -186,6 +218,7 @@ export const TicketList: React.FC<TicketListProps> = ({
                 style={styles.formElements}
                 size='medium'
                 label='Description'
+                value={selectedTicket?.description}
                 placeholder='Place your Text'
                 onChangeText={nextValue => setDescription(nextValue)}
               />
@@ -193,6 +226,7 @@ export const TicketList: React.FC<TicketListProps> = ({
                 style={styles.formElements}
                 size='medium'
                 label='Status'
+                value={selectedTicket?.status}
                 placeholder='Place your Text'
                 onChangeText={nextValue => setStatus(nextValue)}
               />
@@ -200,6 +234,7 @@ export const TicketList: React.FC<TicketListProps> = ({
                 style={styles.formElements}
                 size='medium'
                 label='Priority'
+                value={selectedTicket?.priority}
                 placeholder='Place your Text'
                 onChangeText={nextValue => setPriority(nextValue)}
               />
@@ -207,15 +242,20 @@ export const TicketList: React.FC<TicketListProps> = ({
                 style={styles.formElements}
                 size='medium'
                 label='Agent Group'
+                value={selectedTicket?.agent_group}
                 placeholder='Place your Text'
                 onChangeText={nextValue => setAgentGroup(nextValue)}
               />
 
               <Button
                 style={styles.bottomSheetButton}
-                onPress={() => handleAddTicketPress()}
+                onPress={() => {
+                  (bottomSheetAction === 'add')
+                    ? handleAddOrEditTicketPress()
+                    : closeBottomSheet();
+                }}
               >
-                Add Ticket
+                {bottomSheetCTA}
               </Button>
             </Layout>
           </Layout>

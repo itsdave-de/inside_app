@@ -1,17 +1,21 @@
 import React from 'react';
-import { View, StyleSheet, ViewProps } from 'react-native';
+import { View, StyleSheet, ViewProps, Pressable } from 'react-native';
 
 import { shadows } from '../styles/shadows';
 import { Ticket } from '@src/models/Ticket';
-import { Card, Divider, Layout, Text } from '@ui-kitten/components';
+import { Card, Divider, Icon, Layout, Text, useTheme } from '@ui-kitten/components';
 import { getFormatedDate } from '@src/services/DateUtils';
 
 type TicketItemProps = {
   ticket: Ticket;
+  openViewTicketBottomSheet: () => void;
+  setSelectedTicket: React.Dispatch<React.SetStateAction<Ticket | null>>;
 };
 
 export const TicketItem = React.memo<TicketItemProps>(
-  ({ ticket }) => {
+  ({ ticket, openViewTicketBottomSheet, setSelectedTicket }) => {
+    const theme = useTheme();
+
     const creationDate: string = getFormatedDate(ticket.creation);
 
     const cardHeader = (props: ViewProps): React.ReactElement => (
@@ -23,11 +27,22 @@ export const TicketItem = React.memo<TicketItemProps>(
     );
 
     const cardFooter = (props: ViewProps): React.ReactElement => (
-      <View {...props}>
-        <Text category='c1'>
+      <View {...props} style={styles.footerContainer}>
+        <Text category='c1' style={{ margin: 5 }}>
           Created At {creationDate}
         </Text>
-      </View>
+        <View style={styles.actionsContainer}>
+          <Pressable onPress={() => {
+            setSelectedTicket(ticket);
+            openViewTicketBottomSheet();
+          }}>
+            <Icon
+              name="eye"
+              style={[styles.icon, { tintColor: theme['color-primary-default'] }]}
+            />
+          </Pressable>
+        </View>
+      </View >
     );
 
     return (
@@ -72,5 +87,23 @@ const styles = StyleSheet.create({
   description: {
     margin: 5,
     maxWidth: '100%'
+  },
+  footerContainer: {
+    flex: 1,
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+    margin: 15
+  },
+  actionsContainer: {
+    flex: 1,
+    flexDirection: 'row',
+    justifyContent: 'flex-end',
+    alignItems: 'center'
+  },
+  icon: {
+    width: 25,
+    height: 25,
+    margin: 5,
   },
 });
